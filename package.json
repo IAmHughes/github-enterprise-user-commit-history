@@ -1,0 +1,17 @@
+{
+  "name": "user-commit-history-report",
+  "version": "1.0.0",
+  "description": "Generate a csv of a given user's commit history",
+  "main": "user-commit-history-report.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "IAmHughes",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/graphql": "*",
+    "dotenv": "*",
+    "yargs": "*",
+    "fs": "*"
+  }
+}
