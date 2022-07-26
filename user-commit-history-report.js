@@ -88,6 +88,7 @@ async function getUserCommitHistory () {
                       ... on Commit {
                         committedDate
                         oid
+                        message
                         additions
                         deletions
                         changedFiles
@@ -131,9 +132,10 @@ async function getUserCommitHistory () {
               const repoName = repo.name
               const date = commit.committedDate
               const commitSha = commit.oid
+              const commitMessage = JSON.stringify(commit.message)
               const numFilesChanged = commit.changedFiles
               const diffUrl = commit.commitUrl
-              addToCSV(orgName, repoName, date, commitSha, numFilesChanged, diffUrl)
+              addToCSV(orgName, repoName, date, commitSha, commitMessage, numFilesChanged, diffUrl)
             }
 
             if (hasNextPageCommit) {
@@ -160,12 +162,12 @@ function createCSV () {
   if (!fs.existsSync(outputBaseFolder)) {
     fs.mkdirSync(outputBaseFolder)
   }
-  const header = 'Organization,Repository,Date,CommitSha,NumFilesChanged,DiffURL'
+  const header = 'Organization,Repository,Date,CommitSha,CommitMessage,NumFilesChanged,DiffURL'
   fs.appendFileSync(outputFile, header + '\n', err => {
     if (err) return console.log(err)
   })
 }
 
-function addToCSV (org, repo, date, commitSha, numFilesChanged, diffUrl) {
-  fs.appendFileSync(outputFile, `${org},${repo},${date},${commitSha},${numFilesChanged},${diffUrl}\n`)
+function addToCSV (org, repo, date, commitSha, commitMessage, numFilesChanged, diffUrl) {
+  fs.appendFileSync(outputFile, `${org},${repo},${date},${commitSha},${commitMessage},${numFilesChanged},${diffUrl}\n`)
 }
