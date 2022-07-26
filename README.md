@@ -19,11 +19,11 @@ Once the script has run to completion, you will be presented with a report in th
 `Filename: user-<username>-commit-history-report-<epoch_timestamp>.csv`
 
 ```csv
-Organization,Repository,Date,CommitSha,CommitMessage,NumFilesChanged,DiffURL
-org1,repo1,2022-07-25T09:30:21Z,0884ba29abcdefghijklmnopqrst12345,add stuff,3,https://<url>
-org1,repo2,2022-07-22T13:27:00Z,0884ba29abcdefghijklmnopqrst67890,remove things,13,https://<url>
-org2,repo1,2022-07-19T06:23:37Z,0884ba29abcdefghijklmnopqrst13579,doing more things,24,https://<url>
-org2,repo2,2022-07-19T06:15:01Z,0884ba29abcdefghijklmnopqrst246810,another message,1,https://<url>
+Organization,Repository,Date,CommitSha,CommitMessage,NumFilesChanged,DiffURL,FileList
+org1,repo1,2022-07-25T09:30:21Z,0884ba29abcdefghijklmnopqrst12345,add stuff,3,https://<url>,<list-of-files>
+org1,repo2,2022-07-22T13:27:00Z,0884ba29abcdefghijklmnopqrst67890,remove things,13,https://<url>,<list-of-files>
+org2,repo1,2022-07-19T06:23:37Z,0884ba29abcdefghijklmnopqrst13579,doing more things,24,https://<url>,<list-of-files>
+org2,repo2,2022-07-19T06:15:01Z,0884ba29abcdefghijklmnopqrst246810,another message,1,https://<url>,<list-of-files>
 ...
 ```
 
