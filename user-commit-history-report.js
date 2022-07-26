@@ -124,7 +124,7 @@ async function getUserCommitHistory () {
 
         for (const repo of reposObj) {
           const commitsObj = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.nodes
-          hasNextPageCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.pageInfo.hasNextPage
+          hasNextPageCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.pageInfo.hasNextPage
           if (Object.keys(commitsObj).length > 0) {
             for (const commit of commitsObj) {
               const orgName = repo.owner.login
@@ -137,7 +137,7 @@ async function getUserCommitHistory () {
             }
 
             if (hasNextPageCommit) {
-              paginationCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.pageInfo.endCursor
+              paginationCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.pageInfo.endCursor
             } else {
               paginationCommit = null
             }
