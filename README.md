@@ -13,6 +13,12 @@ This Node script can be used on GitHub Enterprise (Server or Cloud) to get a spe
 - Run the script and pass the username via the `--user` flag
   - `node user-commit-history-report.js --user <someUserHandle>`
 
+## Bulk run reports
+- Create `.env` with needed variables based on `.env.example`
+- Use the bash script `pull_users.sh` to batch run multiple users and combine the results into a single file
+  - `./pull_users.sh [username] [username] .. [username]`
+  - The combined final report will be in the CWD called `report.csv` 
+
 ## Report layout
 Once the script has run to completion, you will be presented with a report in the format below:
 
