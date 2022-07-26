@@ -141,7 +141,7 @@ async function getUserCommitHistory () {
               const numFilesChanged = commit.changedFiles
               const diffUrl = commit.commitUrl
               const fileList = commit.tree.entries.map(file=> file.name).join(' ')
-              addToCSV(orgName, repoName, date, commitSha, commitMessage, numFilesChanged, diffUrl, fileList)
+              addToCSV(argv.user, orgName, repoName, date, commitSha, commitMessage, numFilesChanged, diffUrl, fileList)
             }
 
             if (hasNextPageCommit) {
@@ -168,12 +168,12 @@ function createCSV () {
   if (!fs.existsSync(outputBaseFolder)) {
     fs.mkdirSync(outputBaseFolder)
   }
-  const header = 'Organization,Repository,Date,CommitSha,CommitMessage,NumFilesChanged,DiffURL,FileList'
+  const header = 'User,Organization,Repository,Date,CommitSha,CommitMessage,NumFilesChanged,DiffURL,FileList'
   fs.appendFileSync(outputFile, header + '\n', err => {
     if (err) return console.log(err)
   })
 }
 
-function addToCSV (org, repo, date, commitSha, commitMessage, numFilesChanged, diffUrl, fileList) {
-  fs.appendFileSync(outputFile, `${org},${repo},${date},${commitSha},${commitMessage},${numFilesChanged},${diffUrl},${fileList}\n`)
+function addToCSV (user, org, repo, date, commitSha, commitMessage, numFilesChanged, diffUrl, fileList) {
+  fs.appendFileSync(outputFile, `${user},${org},${repo},${date},${commitSha},${commitMessage},${numFilesChanged},${diffUrl},${fileList}\n`)
 }
