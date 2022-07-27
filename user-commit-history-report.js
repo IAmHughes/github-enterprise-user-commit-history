@@ -119,13 +119,17 @@ async function getUserCommitHistory () {
           cursorCommit: paginationCommit
         })
 
-        hasNextPageRepo = getUserCommitHistoryResult.user.repositoriesContributedTo.pageInfo.hasNextPage
-        const reposObj = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes
+        const repositoriesContributedTo = getUserCommitHistoryResult.user.repositoriesContributedTo
+        const repositoriesContributedToPageInfo = repositoriesContributedTo.pageInfo
+        hasNextPageRepo = repositoriesContributedToPageInfo.hasNextPage
+        const reposObj = repositoriesContributedTo.nodes
         let repoNode = 0
 
         for (const repo of reposObj) {
-          const commitsObj = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.nodes
-          hasNextPageCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.pageInfo.hasNextPage
+          const repoHistory = repo.defaultBranchRef.target.history
+          const repoHistoryPageInfo = repoHistory.pageInfo
+          const commitsObj = repoHistory.nodes
+          hasNextPageCommit = repoHistoryPageInfo.hasNextPage
           if (Object.keys(commitsObj).length > 0) {
             for (const commit of commitsObj) {
               const orgName = repo.owner.login
@@ -139,7 +143,7 @@ async function getUserCommitHistory () {
             }
 
             if (hasNextPageCommit) {
-              paginationCommit = getUserCommitHistoryResult.user.repositoriesContributedTo.nodes[repoNode].defaultBranchRef.target.history.pageInfo.endCursor
+              paginationCommit = repoHistoryPageInfo.endCursor
             } else {
               paginationCommit = null
             }
@@ -148,7 +152,7 @@ async function getUserCommitHistory () {
         }
       } while (hasNextPageCommit)
       if (hasNextPageRepo) {
-        paginationRepo = getUserCommitHistoryResult.user.repositoriesContributedTo.pageInfo.endCursor
+        paginationRepo = repositoriesContributedToPageInfo.endCursor
       }
     } while (hasNextPageRepo)
   } catch (error) {
