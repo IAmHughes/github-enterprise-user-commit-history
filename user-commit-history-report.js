@@ -13,11 +13,15 @@ const outputBaseFolder = process.env.OUTPUT_FOLDER
 // Full path and name of output file to create
 const outputFile = `${outputBaseFolder}/user-${argv.user}-commit-history-report-${Date.now()}.csv`
 
+async function runGraphQL() {
+  await getUserAuthorID()
+  getUserCommitHistory()
+}
+
 let authorID = null
 if (argv.user.length > 0) {
   createCSV()
-  getUserAuthorID()
-  getUserCommitHistory()
+  runGraphQL()
 } else {
   console.log('Invalid options passed\n')
   console.log('To use this script, you must specify a user: ')
