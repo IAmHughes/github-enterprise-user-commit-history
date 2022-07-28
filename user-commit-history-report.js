@@ -54,7 +54,7 @@ async function getUserCommitHistory () {
   let paginationRepo = null
   let paginationCommit = null
   const query =
-    `query ($user: String!, $authorID: ID, $startDate: GitTimestamp, $cursorRepo: String, $cursorCommit: String) {
+    `query ($user: String!, $cursorRepo: String) {
       user(login: $user) {
         repositoriesContributedTo(
           includeUserRepositories: true
@@ -72,89 +72,97 @@ async function getUserCommitHistory () {
               login
             }
             name
-            url
-            defaultBranchRef {
-              name
-              target {
-                ... on Commit {
-                  history(
-                    first: 100
-                    after: $cursorCommit
-                    since: $startDate
-                    author: { id: $authorID }
-                  ) {
-                    totalCount
-                    pageInfo {
-                      hasNextPage
-                      endCursor
-                    }
-                    nodes {
-                      ... on Commit {
-                        committedDate
-                        oid
-                        message
-                        additions
-                        deletions
-                        changedFiles
-                        commitUrl
-                        treeUrl
-                      }
-                    }
-                  }
+          }
+        }
+      }
+    }`
+
+  const commitQuery =
+      `query ($authorID: ID, $ownerName: String!, $repoName: String!, $startDate: GitTimestamp, $cursorCommit: String) {
+    repository(owner: $ownerName, name: $repoName) {
+      defaultBranchRef {
+        name
+        target {
+        ... on Commit {
+            history(
+                first: 100
+            after: $cursorCommit
+            since: $startDate
+            author: { id: $authorID }
+          ){
+              totalCount
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
+              ... on Commit {
+                  committedDate
+                  oid
+                  message
+                  additions
+                  deletions
+                  changedFiles
+                  commitUrl
+                  treeUrl
                 }
               }
             }
           }
         }
       }
-    }`
+    }
+  }`
+
   try {
     let hasNextPageRepo = false
     let hasNextPageCommit = false
     let getUserCommitHistoryResult = null
+    let getUserCommitRepoHistoryResult = null
     do {
-      do {
-        getUserCommitHistoryResult = await graphql({
+        getUserCommitRepoHistoryResult = await graphql({
           query,
           user: argv.user,
-          authorID: authorID,
-          startDate: process.env.START_DATE,
-          cursorRepo: paginationRepo,
-          cursorCommit: paginationCommit
+          cursorRepo: paginationRepo
         })
-
-        const repositoriesContributedTo = getUserCommitHistoryResult.user.repositoriesContributedTo
+        const repositoriesContributedTo = getUserCommitRepoHistoryResult.user.repositoriesContributedTo
         const repositoriesContributedToPageInfo = repositoriesContributedTo.pageInfo
         hasNextPageRepo = repositoriesContributedToPageInfo.hasNextPage
         const reposObj = repositoriesContributedTo.nodes
         let repoNode = 0
 
         for (const repo of reposObj) {
-          const repoHistory = repo.defaultBranchRef.target.history
-          const repoHistoryPageInfo = repoHistory.pageInfo
-          const commitsObj = repoHistory.nodes
-          hasNextPageCommit = repoHistoryPageInfo.hasNextPage
-          if (Object.keys(commitsObj).length > 0) {
-            for (const commit of commitsObj) {
-              const orgName = repo.owner.login
-              const repoName = repo.name
-              const date = commit.committedDate
-              const commitSha = commit.oid
-              const commitMessage = JSON.stringify(commit.message)
-              const numFilesChanged = commit.changedFiles
-              const diffUrl = commit.commitUrl
-              addToCSV(argv.user, orgName, repoName, date, commitSha, commitMessage, numFilesChanged, diffUrl)
-            }
+          if (repo == null) { continue; }
+          do {
+            getUserCommitHistoryResult = await graphql({
+              query: commitQuery,
+              authorID: authorID,
+              ownerName: repo.owner.login,
+              repoName: repo.name,
+              startDate: process.env.START_DATE,
+              cursorCommit: paginationCommit
+            })
 
-            if (hasNextPageCommit) {
-              paginationCommit = repoHistoryPageInfo.endCursor
-            } else {
-              paginationCommit = null
+            if (getUserCommitHistoryResult.repository.defaultBranchRef != null) {
+              const repoHistory = getUserCommitHistoryResult.repository.defaultBranchRef.target.history
+              const repoHistoryPageInfo = repoHistory.pageInfo
+              const commitsObj = repoHistory.nodes
+              hasNextPageCommit = repoHistoryPageInfo.hasNextPage
+              if (Object.keys(commitsObj).length > 0) {
+                for (const commit of commitsObj) {
+                  addToCSV(argv.user, repo.owner.login, repo.name, commit.committedDate, commit.oid, JSON.stringify(commit.message), commit.changedFiles, commit.commitUrl)
+                }
+
+                if (hasNextPageCommit) {
+                  paginationCommit = repoHistoryPageInfo.endCursor
+                } else {
+                  paginationCommit = null
+                }
+              }
+              repoNode++
             }
-          }
-          repoNode++
+          } while (hasNextPageCommit)
         }
-      } while (hasNextPageCommit)
       if (hasNextPageRepo) {
         paginationRepo = repositoriesContributedToPageInfo.endCursor
       }
